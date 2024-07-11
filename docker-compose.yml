@@ -1,0 +1,71 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./volumes/db/:/var/lib/postgresql/data/
+
+  application:
+    build: ./application/
+    restart: always
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    env_file:
+      - ./application/.env
+    command: >
+      /bin/sh -c "
+      python manage.py wait_for_db &&
+      python manage.py wait_for_redis &&
+      python manage.py makemigrations --noinput &&
+      python manage.py migrate --noinput &&
+      python manage.py collectstatic --noinput &&
+      gunicorn --bind 0.0.0.0:${API_PORT} config.wsgi:application --log-level ${API_LOG_LEVEL} --workers ${API_WORKERS} --threads ${API_THREADS} --access-logfile 'logs/backend.logs' --error-logfile 'logs/errors.logs'"
+    volumes:
+      - ./logs/application/:/app/logs/
+
+#  nginx:
+#    build: ./nginx/
+#    restart: always
+#    ports:
+#      - "443:443"
+#      - "80:80"
+#    volumes:
+#      - ./logs/ngnix/:/var/log/nginx/
+#    depends_on:
+#      - application
+
+#  certbot:
+#    depends_on:
+#      - nginx
+
+#  worker:
+#    build: ./application/
+#    command: celery -A config worker -l ${WORKER_LOG_LEVEL} -f '/app/worker_logs/worker.logs' -c ${WORKER_PROCESSOR} -s django_worker
+#    volumes:
+#      - celery:/usr/src/app/
+#      - ./logs/worker/:/app/worker_logs
+#    depends_on:
+#      - nginx
+#
+#  beat:
+#    build: ./application/
+#    command: celery -A config beat -l ${BEAT_LOG_LEVEL} -f '/app/beat_logs/beat.logs' -c ${BEAT_PROCESSOR} -s django_beat
+#    volumes:
+#      - celery:/usr/src/app/
+#      - ./logs/beat/:/app/beat_logs
+#    depends_on:
+#      - worker
+
+volumes:
+  celery:
+
+
