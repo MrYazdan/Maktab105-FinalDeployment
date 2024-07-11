@@ -34,8 +34,6 @@ services:
   nginx:
     build: ./nginx/
     restart: always
-    env_file:
-      - ./nginx/.env
     ports:
       - "443:443"
       - "80:80"
@@ -51,8 +49,6 @@ services:
 
   certbot:
     build: ./certbot/
-    env_file:
-      - ./nginx/.env
     command: echo "Certbot Skipping ..."
     volumes:
       - ./volumes/certbot/www/:/vol/www/
