@@ -2,7 +2,7 @@ server {
     listen 80;
     server_name rangvorang.ir;
 
-    location /.well-known/acme-challeng/ {
+    location /.well-known/acme-challenge/ {
         root /vol/www/;
     }
 }
