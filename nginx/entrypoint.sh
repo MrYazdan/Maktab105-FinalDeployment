@@ -11,10 +11,10 @@ fi
 echo "Checking for fullchain.pem"
 if [ ! -f "/etc/letsencrypt/live/rangvorang.ir/fullchain.pem" ]; then
   echo "No SSL certification, HTTP Mode Enabled !"
-  mv /etc/nginx/default.conf.template /etc/nginx/conf.d/default.conf
+  cat /etc/nginx/default.conf.template > /etc/nginx/conf.d/default.conf
 else
   echo "SSL cert exists, HTTPS Mode Enabled !"
-  mv /etc/nginx/default-ssl.conf.template /etc/nginx/conf.d/default.conf
+  cat /etc/nginx/default-ssl.conf.template > /etc/nginx/conf.d/default.conf
 fi
 
 nginx-debug -g "daemon off;"
