@@ -49,6 +49,7 @@ services:
 
   certbot:
     build: ./certbot/
+    command: echo "Certbot | Skipping ..."
     volumes:
       - ./volumes/certbot/www/:/vol/www/
       - ./volumes/certbot/certs/:/etc/letsencrypt/
