@@ -8,3 +8,4 @@ celery
 redis
 mixer
 psycopg2-binary
+gunicorn
