@@ -17,8 +17,6 @@ services:
   application:
     build: ./application/
     restart: always
-    ports:
-      - "${API_PORT}:${API_PORT}"
     env_file:
       - ./application/.env
     command: >
@@ -31,21 +29,36 @@ services:
       gunicorn --bind 0.0.0.0:${API_PORT} config.wsgi:application --log-level ${API_LOG_LEVEL} --workers ${API_WORKERS} --threads ${API_THREADS} --access-logfile 'logs/backend.logs' --error-logfile 'logs/errors.logs'"
     volumes:
       - ./logs/application/:/app/logs/
+      - ./volumes/storage/:/app/storage/
 
-#  nginx:
-#    build: ./nginx/
-#    restart: always
-#    ports:
-#      - "443:443"
-#      - "80:80"
-#    volumes:
-#      - ./logs/ngnix/:/var/log/nginx/
-#    depends_on:
-#      - application
+  nginx:
+    build: ./nginx/
+    restart: always
+    env_file:
+      - ./nginx/.env
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./logs/nginx/:/var/log/nginx/
+      - ./volumes/storage/:/shared/
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./volumes/nginx/proxy_dhparams/:/vol/proxy/
+      - ./volumes/certbot/www/:/vol/www/
+      - ./volumes/certbot/certs/:/etc/letsencrypt/
+    depends_on:
+      - application
 
-#  certbot:
-#    depends_on:
-#      - nginx
+  certbot:
+    build: ./certbot/
+    env_file:
+      - ./nginx/.env
+    command: echo "Certbot Skipping ..."
+    volumes:
+      - ./volumes/certbot/www/:/vol/www/
+      - ./volumes/certbot/certs/:/etc/letsencrypt/
+    depends_on:
+      - nginx
 
 #  worker:
 #    build: ./application/
