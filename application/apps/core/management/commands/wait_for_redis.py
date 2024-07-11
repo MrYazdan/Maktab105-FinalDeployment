@@ -26,4 +26,5 @@ class Command(BaseCommand):
                     break
 
             self.stdout.write(self.style.SUCCESS('Redis available'))
-        self.stdout.write(self.style.MIGRATE_HEADING('Redis availability passed because debug mode is True'))
+        else:
+            self.stdout.write(self.style.MIGRATE_HEADING('Redis availability passed because debug mode is True'))
